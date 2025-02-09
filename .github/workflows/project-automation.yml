@@ -24,7 +24,7 @@ jobs:
         with:
           project: Gamified Sabbath School
           column: ✅ Done
-          repo-token: ${{ secrets.GH_TOKEN }}
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
 
   pr_automation:
     runs-on: ubuntu-latest
@@ -35,7 +35,7 @@ jobs:
         with:
           project: Gamified Sabbath School
           column: 🏗️ In Progress
-          repo-token: ${{ secrets.GH_TOKEN }}
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Move PR to Review
         if: github.event_name == 'pull_request' && github.event.action == 'ready_for_review'
@@ -43,4 +43,4 @@ jobs:
         with:
           project: Gamified Sabbath School
           column: 👀 Review
-          repo-token: ${{ secrets.GH_TOKEN }}
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
