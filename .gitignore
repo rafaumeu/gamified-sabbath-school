@@ -1,0 +1,70 @@
+# Dependências
+node_modules/
+.pnp/
+.pnp.js
+
+# Ambiente de desenvolvimento
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Build e cache
+.next/
+out/
+build/
+dist/
+.turbo
+.cache
+tsconfig.tsbuildinfo
+
+# Logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Sistema operacional
+.DS_Store
+Thumbs.db
+
+# IDE e editores
+.idea/
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# Testes
+coverage/
+
+# Prisma
+packages/database/prisma/migrations/
+packages/database/prisma/*.db
+packages/database/prisma/*.db-journal
+
+# Arquivos temporários
+*.tmp
+*.temp
+.vercel
+.netlify
+
+# Docker
+docker-compose.override.yml
+
+# Yarn
+.yarn/*
+!.yarn/patches
+!.yarn/plugins
+!.yarn/releases
+!.yarn/sdks
+!.yarn/versions
+.pnp.* 

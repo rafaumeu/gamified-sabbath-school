@@ -1,0 +1,5 @@
+feature: ["feature/*", "feat/*"]
+bug: ["fix/*", "bugfix/*"]
+documentation: ["docs/*"]
+enhancement: ["enhancement/*", "improve/*"]
+setup: ["setup/*", "config/*"]

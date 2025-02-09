@@ -1,0 +1,46 @@
+name: Project Board Automation
+
+on:
+  issues:
+    types: [opened, reopened, closed]
+  pull_request:
+    types: [opened, reopened, closed, ready_for_review]
+
+jobs:
+  issue_automation:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Move new issues to Backlog
+        if: github.event_name == 'issues' && github.event.action == 'opened'
+        uses: alex-page/github-project-automation-plus@v0.8.3
+        with:
+          project: Gamified Sabbath School
+          column: 🎯 Backlog
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Move closed issues to Done
+        if: github.event_name == 'issues' && github.event.action == 'closed'
+        uses: alex-page/github-project-automation-plus@v0.8.3
+        with:
+          project: Gamified Sabbath School
+          column: ✅ Done
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
+
+  pr_automation:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Move PR to In Progress
+        if: github.event_name == 'pull_request' && github.event.action == 'opened'
+        uses: alex-page/github-project-automation-plus@v0.8.3
+        with:
+          project: Gamified Sabbath School
+          column: 🏗️ In Progress
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Move PR to Review
+        if: github.event_name == 'pull_request' && github.event.action == 'ready_for_review'
+        uses: alex-page/github-project-automation-plus@v0.8.3
+        with:
+          project: Gamified Sabbath School
+          column: 👀 Review
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
