@@ -16,7 +16,7 @@ jobs:
         with:
           project: Gamified Sabbath School
           column: 🎯 Backlog
-          repo-token: ${{ secrets.GH_TOKEN }}
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Move closed issues to Done
         if: github.event_name == 'issues' && github.event.action == 'closed'
