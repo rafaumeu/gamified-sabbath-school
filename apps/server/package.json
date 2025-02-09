@@ -1,0 +1,20 @@
+{
+  "name": "@sabbath-school/server",
+  "version": "0.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "tsx watch src/index.ts",
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "lint": "biome lint ."
+  },
+  "dependencies": {
+    "@sabbath-school/database": "workspace:*",
+    "@sabbath-school/shared": "workspace:*",
+    "fastify": "^4.0.0"
+  },
+  "devDependencies": {
+    "tsx": "^4.0.0",
+    "typescript": "^5.0.0"
+  }
+}
