@@ -4,43 +4,53 @@ on:
   issues:
     types: [opened, reopened, closed]
   pull_request:
-    types: [opened, reopened, closed, ready_for_review]
+    types: [opened, reopened, closed, ready_for_review, merged]
+
+permissions:
+  issues: write
+  pull-requests: write
+  repository-projects: write
+  contents: read
+  projects: write
 
 jobs:
-  issue_automation:
+  add_to_project:
     runs-on: ubuntu-latest
     steps:
-      - name: Move new issues to Backlog
-        if: github.event_name == 'issues' && github.event.action == 'opened'
-        uses: alex-page/github-project-automation-plus@v0.8.3
+      - uses: actions/add-to-project@v0.5.0
         with:
-          project: Gamified Sabbath School
-          column: 🎯 Backlog
-          repo-token: ${{ secrets.GITHUB_TOKEN }}
+          project-url: https://github.com/users/rafaumeu/projects/4
+          github-token: ${{ secrets.GH_TOKEN }}
 
-      - name: Move closed issues to Done
-        if: github.event_name == 'issues' && github.event.action == 'closed'
-        uses: alex-page/github-project-automation-plus@v0.8.3
+      - name: Update issue status
+        if: github.event_name == 'issues'
+        uses: actions/github-script@v6
         with:
-          project: Gamified Sabbath School
-          column: ✅ Done
-          repo-token: ${{ secrets.GITHUB_TOKEN }}
+          github-token: ${{ secrets.GH_TOKEN }}
+          script: |
+            const status = context.payload.action === 'opened' ? '🎯 Backlog' :
+                          context.payload.action === 'closed' ? '✅ Done' : null;
 
-  pr_automation:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Move PR to In Progress
-        if: github.event_name == 'pull_request' && github.event.action == 'opened'
-        uses: alex-page/github-project-automation-plus@v0.8.3
-        with:
-          project: Gamified Sabbath School
-          column: 🏗️ In Progress
-          repo-token: ${{ secrets.GITHUB_TOKEN }}
+            if (status) {
+              await github.rest.projects.updateCard({
+                card_id: context.payload.project_card.id,
+                column_name: status
+              });
+            }
 
-      - name: Move PR to Review
-        if: github.event_name == 'pull_request' && github.event.action == 'ready_for_review'
-        uses: alex-page/github-project-automation-plus@v0.8.3
+      - name: Update PR status
+        if: github.event_name == 'pull_request'
+        uses: actions/github-script@v6
         with:
-          project: Gamified Sabbath School
-          column: 👀 Review
-          repo-token: ${{ secrets.GITHUB_TOKEN }}
+          github-token: ${{ secrets.GH_TOKEN }}
+          script: |
+            const status = context.payload.action === 'opened' ? '🏗️ In Progress' :
+                          context.payload.action === 'ready_for_review' ? '👀 Review' :
+                          (context.payload.action === 'closed' || context.payload.pull_request.merged) ? '✅ Done' : null;
+
+            if (status) {
+              await github.rest.projects.updateCard({
+                card_id: context.payload.project_card.id,
+                column_name: status
+              });
+            }

@@ -3,6 +3,10 @@ on:
   pull_request:
     types: [opened]
 
+permissions:
+  pull-requests: write
+  contents: read
+
 jobs:
   pr-labeler:
     runs-on: ubuntu-latest
@@ -10,4 +14,4 @@ jobs:
       - uses: TimonVS/pr-labeler-action@v3
         with:
           configuration-path: .github/pr-labeler.yml
-          repo-token: ${{ secrets.GITHUB_TOKEN }}
+          repo-token: ${{ secrets.GH_TOKEN }}

@@ -3,18 +3,42 @@ name: Code Review
 on:
   pull_request:
     types: [opened, synchronize]
+    paths:
+      - "apps/**"
+      - "packages/**"
+      - "!**.md"
+      - "!**.json"
+
+permissions:
+  pull-requests: write
+  contents: read
+  issues: write
 
 jobs:
-  code-review:
+  review:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      
-      - name: Code Review
-        uses: coderabbitai/ai-pr-reviewer@latest
-        env:
+      - uses: coderabbitai/ai-pr-reviewer@latest
+        with:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
-        with:
-          debug: false
-          review_comment_lgtm: true
+          path_filters: |
+            apps/web/**
+            apps/server/**
+            packages/**
+          path_excludes: |
+            **/*.test.ts
+            **/*.spec.ts
+            **/*.md
+            **/*.json
+          review_settings: |
+            max_files_per_review: 20
+            max_lines_per_review: 500
+          review_comment_settings:
+            comment_style: "multiline"
+            request_changes_workflow: false
+          language_settings:
+            typescript:
+              max_line_length: 80
+              prefer_const: true
+              no_unused_vars: true
