@@ -11,19 +11,12 @@ permissions:
   pull-requests: write
   repository-projects: write
   contents: read
-  projects: write
 
 jobs:
   add_to_project:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/add-to-project@v0.5.0
-        with:
-          project-url: https://github.com/users/rafaumeu/projects/4
-          github-token: ${{ secrets.GH_TOKEN }}
-
       - name: Get project data
-        if: github.event_name == 'issues' || github.event_name == 'pull_request'
         env:
           GH_TOKEN: ${{ secrets.GH_TOKEN }}
         run: |
@@ -34,62 +27,40 @@ jobs:
           echo 'REVIEW_OPTION_ID=98236657' >> $GITHUB_ENV
           echo 'DONE_OPTION_ID=9dc3432f' >> $GITHUB_ENV
 
+      - uses: actions/add-to-project@v0.5.0
+        with:
+          project-url: https://github.com/users/rafaumeu/projects/4
+          github-token: ${{ secrets.GH_TOKEN }}
+
       - name: Update issue status
         if: github.event_name == 'issues'
-        env:
-          GH_TOKEN: ${{ secrets.GH_TOKEN }}
-        run: |
-          ITEM_ID="${{ github.event.issue.node_id }}"
+        uses: actions/github-script@v6
+        with:
+          github-token: ${{ secrets.GH_TOKEN }}
+          script: |
+            const status = context.payload.action === 'opened' ? '🎯 Backlog' :
+                          context.payload.action === 'closed' ? '✅ Done' : null;
 
-          if [[ "${{ github.event.action }}" == "opened" ]]; then
-            STATUS_VALUE=${{ env.BACKLOG_OPTION_ID }}
-          elif [[ "${{ github.event.action }}" == "closed" ]]; then
-            STATUS_VALUE=${{ env.DONE_OPTION_ID }}
-          fi
-
-          if [[ -n "$STATUS_VALUE" ]]; then
-            gh api graphql -f query='
-              mutation($project:ID!, $item:ID!, $field:ID!, $value:String!) {
-                updateProjectV2ItemFieldValue(
-                  input: {
-                    projectId: $project
-                    itemId: $item
-                    fieldId: $field
-                    value: { singleSelectOptionId: $value }
-                  }
-                ) {
-                  projectV2Item { id }
-                }
-              }' -f project=${{ env.PROJECT_ID }} -f item=$ITEM_ID -f field=${{ env.STATUS_FIELD_ID }} -f value=$STATUS_VALUE
-          fi
+            if (status) {
+              await github.rest.projects.updateCard({
+                card_id: context.payload.project_card.id,
+                column_name: status
+              });
+            }
 
       - name: Update PR status
         if: github.event_name == 'pull_request'
-        env:
-          GH_TOKEN: ${{ secrets.GH_TOKEN }}
-        run: |
-          ITEM_ID="${{ github.event.pull_request.node_id }}"
+        uses: actions/github-script@v6
+        with:
+          github-token: ${{ secrets.GH_TOKEN }}
+          script: |
+            const status = context.payload.action === 'opened' ? '🏗️ In Progress' :
+                          context.payload.action === 'ready_for_review' ? '👀 Review' :
+                          (context.payload.action === 'closed' || context.payload.pull_request.merged) ? '✅ Done' : null;
 
-          if [[ "${{ github.event.action }}" == "opened" ]]; then
-            STATUS_VALUE=${{ env.IN_PROGRESS_OPTION_ID }}
-          elif [[ "${{ github.event.action }}" == "ready_for_review" ]]; then
-            STATUS_VALUE=${{ env.REVIEW_OPTION_ID }}
-          elif [[ "${{ github.event.action }}" == "closed" ]] || [[ "${{ github.event.pull_request.merged }}" == "true" ]]; then
-            STATUS_VALUE=${{ env.DONE_OPTION_ID }}
-          fi
-
-          if [[ -n "$STATUS_VALUE" ]]; then
-            gh api graphql -f query='
-              mutation($project:ID!, $item:ID!, $field:ID!, $value:String!) {
-                updateProjectV2ItemFieldValue(
-                  input: {
-                    projectId: $project
-                    itemId: $item
-                    fieldId: $field
-                    value: { singleSelectOptionId: $value }
-                  }
-                ) {
-                  projectV2Item { id }
-                }
-              }' -f project=${{ env.PROJECT_ID }} -f item=$ITEM_ID -f field=${{ env.STATUS_FIELD_ID }} -f value=$STATUS_VALUE
-          fi
+            if (status) {
+              await github.rest.projects.updateCard({
+                card_id: context.payload.project_card.id,
+                column_name: status
+              });
+            }
