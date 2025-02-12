@@ -145,6 +145,13 @@ We follow the conventional commits specification:
 
 [Deployment information will be added]
 
+## 🔄 Workflows
+
+- **Project Board Automation**: Automatically manages project board states
+- **PR Labeler**: Adds labels based on branch names
+- **Branch Protection**: Enforces code review and checks
+- **Commit Lint**: Ensures commit message standards
+
 ---
 
 <div align="center">
