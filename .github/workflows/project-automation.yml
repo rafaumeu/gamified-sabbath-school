@@ -63,17 +63,30 @@ jobs:
 
       - name: Update PR status
         if: github.event_name == 'pull_request'
-        uses: actions/github-script@v6
-        with:
-          github-token: ${{ secrets.GH_TOKEN }}
-          script: |
-            const status = context.payload.action === 'opened' ? '🏗️ In Progress' :
-                          context.payload.action === 'ready_for_review' ? '👀 Review' :
-                          (context.payload.action === 'closed' || context.payload.pull_request.merged) ? '✅ Done' : null;
+        env:
+          GH_TOKEN: ${{ secrets.GH_TOKEN }}
+        run: |
+          STATUS_VALUE=""
+          if [[ "${{ github.event.action }}" == "opened" ]]; then
+            STATUS_VALUE="${{ env.IN_PROGRESS_OPTION_ID }}"
+          elif [[ "${{ github.event.action }}" == "ready_for_review" ]]; then
+            STATUS_VALUE="${{ env.REVIEW_OPTION_ID }}"
+          elif [[ "${{ github.event.action }}" == "closed" && "${{ github.event.pull_request.merged }}" == "true" ]]; then
+            STATUS_VALUE="${{ env.DONE_OPTION_ID }}"
+          fi
 
-            if (status) {
-              await github.rest.projects.updateCard({
-                card_id: context.payload.project_card.id,
-                column_name: status
-              });
-            }
+          if [[ -n "$STATUS_VALUE" ]]; then
+            gh api graphql -f query='
+              mutation($project:ID!, $item:ID!, $field:ID!, $value:String!) {
+                updateProjectV2ItemFieldValue(
+                  input: {
+                    projectId: $project
+                    itemId: $item
+                    fieldId: $field
+                    value: { singleSelectOptionId: $value }
+                  }
+                ) {
+                  projectV2Item { id }
+                }
+              }' -f project=${{ env.PROJECT_ID }} -f item=${{ steps.add-to-project.outputs.itemId }} -f field=${{ env.STATUS_FIELD_ID }} -f value=$STATUS_VALUE
+          fi
