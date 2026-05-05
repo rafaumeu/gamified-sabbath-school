@@ -1,2 +1,7 @@
-// Aqui serão exportados os componentes 
-export * from './Button' 
+export { Button } from './Button'
+export { LeaderboardTable } from './LeaderboardTable'
+export type { LeaderboardEntry } from './LeaderboardTable'
+export { LeaderboardStats } from './LeaderboardStats'
+export type { LeaderboardSummaryStats } from './LeaderboardStats'
+export { SortToggle } from './SortToggle'
+export type { SortField } from './SortToggle'
